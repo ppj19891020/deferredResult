@@ -1,7 +1,10 @@
 package com.fly.springmvc.controller;
 
+import java.time.LocalDateTime;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -18,6 +21,9 @@ import org.springframework.web.context.request.async.WebAsyncTask;
 public class DeferredResultController {
 
   private ConcurrentLinkedDeque<DeferredResult<String>> deferredResults = new ConcurrentLinkedDeque<DeferredResult<String>>();
+
+  private ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
+
 
   /**
    * Callable
@@ -63,7 +69,7 @@ public class DeferredResultController {
    */
   @ResponseBody
   @RequestMapping("/defeeredResult")
-  public DeferredResult<String>  defeeredResult(){
+  public DeferredResult<String>  defeeredResult() throws Exception{
     //设置 5秒就会超时
     final DeferredResult<String> stringDeferredResult = new DeferredResult<String>(100000);
     //将请求加入到队列中
@@ -85,6 +91,14 @@ public class DeferredResultController {
         stringDeferredResult.setResult("error:timeOut");
       }
     });
+
+    Thread.sleep(5000L);
+    cachedThreadPool.execute(()->{
+      LocalDateTime now = LocalDateTime.now();
+      stringDeferredResult.setErrorResult("success"+ now);
+      System.out.println("设置值:"+now);
+    });
+
     return stringDeferredResult;
   }
 
