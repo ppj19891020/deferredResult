@@ -15,7 +15,7 @@
 
   <!-- spring mvc 异步 -->
   <mvc:annotation-driven>
-    <mvc:async-support default-timeout="5000"/>
+    <mvc:async-support default-timeout="10000"/>
   </mvc:annotation-driven>
 
   <!--避免IE执行AJAX时，返回JSON出现下载文件 -->

@@ -1,10 +1,13 @@
 package com.fly.springmvc.controller;
 
+import com.fly.deferred.core.Queue;
+import com.fly.deferred.core.Task;
 import java.time.LocalDateTime;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -24,6 +27,8 @@ public class DeferredResultController {
 
   private ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
 
+  @Autowired
+  private Queue queue;
 
   /**
    * Callable
@@ -111,5 +116,23 @@ public class DeferredResultController {
     }
     return "OK";
   }
+
+  /**
+   * 测试队列处理
+   * @return
+   */
+  @ResponseBody
+  @RequestMapping("/testQueue")
+  public DeferredResult<String> testQueue() throws InterruptedException {
+    DeferredResult<String> result = new DeferredResult<>();
+    Task<String> task = new Task<>(result,"处理任务完成");
+    result.onTimeout(()->{
+      task.setTimeout(false);
+      System.out.println("任务超时");
+    });
+    queue.put(task);
+    return result;
+  }
+
 
 }
